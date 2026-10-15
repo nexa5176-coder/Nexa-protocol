@@ -1,21 +1,302 @@
-(()=>{'use strict';const KEY='nexa-demo-v1';const initial=()=>({name:'Explorer',agents:{research:true,coordination:false,verification:false},chat:[],events:[]});let state;try{state={...initial(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{state=initial()}const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch{}};const log=(label)=>{state.events.unshift({label,date:new Date().toISOString()});state.events=state.events.slice(0,80);save()};const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const page=document.body.dataset.page;if(page==='index.html'){const hero=document.querySelector('.hero-copy h1');if(state.name!=='Explorer'&&hero){document.querySelector('.pill').title=`Welcome, ${state.name}`}}if(page==='chat.html'){const messages=document.querySelector('#messages');const input=document.querySelector('#chat-input');const reply=q=>{const t=q.toLowerCase().trim();const has=(...words)=>words.some(w=>t.includes(w));const name=state.name&&state.name!=='Explorer'?state.name:'';const greeting=name?`, ${name}`:'';const previous=state.chat.filter(m=>m.role==='user').slice(-2,-1)[0]?.text?.toLowerCase()||'';
-if(/^(hi|hello|hey|yo|good morning|good afternoon|good evening|greetings|halo|hai|pagi|siang|malam|bro)[!. ]*$/.test(t))return `Hello${greeting}! I'm NEXA Assistant. What would you like to talk about today?`;
-if(has('who are you','your name','what are you','siapa kamu','siapa lu'))return "I'm NEXA Assistant, a simple offline chatbot inside the NEXA workspace. I use predefined responses, not a live AI model.";
-if(has('how are you','how is it going','how do you feel','apa kabar'))return "I'm doing well, thanks for asking! How's your day going?";
-if(/^(good|great|fine|amazing|not bad|pretty good|doing well|i am good|i'm good)[!. ]*$/.test(t))return "Glad to hear it! Want to explore NEXA or chat about something else?";
-if(has('thank you','thanks','thx','makasih','terima kasih'))return "You're welcome! I'm here whenever you'd like to continue.";
-if(has('goodbye','see you','bye','dadah'))return "See you soon! Thanks for stopping by NEXA.";
-if(has('clear chat','delete chat','erase messages','hapus chat'))return 'Use the Clear Chat button at the top right of this conversation to delete your chat history.';
-if(has('what time','current time','what date','today date','jam berapa','tanggal berapa'))return `Your device reports ${new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'})}.`;
-if(has('what can you do','help me','your features','how can you help','bisa apa'))return "I can handle basic conversation and explain NEXA, AI agents, Web3, and the workspace menus. I can't browse the web, access wallets, or perform real transactions.";
-if(has('how to use','navigation','where is','which menu','cara pakai'))return 'Open Overview for the project summary, AI Chat to talk, Agent Studio for simulated agent controls, Activity for local history, or Settings to manage your demo profile.';
-if(has('wallet','transaction','trade','trading','token price','market price','buy token','sell token','saldo','harga'))return "This is a prototype. Wallet connections, live market data, and blockchain transactions aren't available.";
-if(has('artificial intelligence','what is ai','explain ai','apa itu ai'))return 'Artificial intelligence is technology that helps computers analyze information, identify patterns, and sometimes generate content. This particular chat is rule-based rather than generative AI.';
-if(has('agent','autonomous','coordinate','coordination','agen'))return 'An AI agent is software designed to work toward a task. NEXA explores research, coordination, and verification as possible agent roles. Agent Studio lets you try a local simulation.';
-if(has('web3','blockchain','onchain','crypto','kripto'))return 'Web3 often refers to blockchain-based applications and services. NEXA explores how autonomous agents could help people navigate related workflows. No live blockchain integration is enabled here.';
-if(has('nexa','this project','this website','what is this','your vision','apa ini'))return "NEXA stands for Network for Execution & Autonomous Agents. It's an early concept exploring AI-agent workflows and Web3 infrastructure. Our tagline is 'Built for What's Next.'";
-if(has('github','website','is this online'))return 'This workspace can be hosted on GitHub Pages. Its basic chat runs locally in your browser without an AI server.';
-if(has('speak english','english only','bahasa indonesia','indonesian'))return "I respond in English only. Feel free to ask a simple question about NEXA, AI, or Web3.";
-if(has('tell me more','explain more','more details','go on','jelasin lagi','lanjut'))return previous.includes('agent')?'One possible flow is research, then coordination, then verification. These roles are currently illustrative, not working autonomous agents.':previous.includes('web3')?'For example, an assistant might one day help explain onchain activity in plain language. That is a product direction, not a feature available in this demo.':'Sure. Would you like to learn more about NEXA, AI agents, Web3, or the workspace?';
-if(/^(ok|okay|nice|cool|yes|sure|great|awesome|gas|sip|oke)[!. ]*$/.test(t))return 'Sounds good! What would you like to explore next?';
-return "I'm a basic offline assistant, so I may not understand that yet. Try asking about NEXA, AI agents, Web3, or the workspace features."};const render=()=>{messages.innerHTML=(state.chat.length?'':'<div class="message bot"><div class="message-label">NEXA / ASSISTANT</div>Hello! 👋 I’m NEXA Assistant. What would you like to explore today?</div>')+state.chat.map(m=>`<div class="message ${m.role}"><div class="message-label">${m.role==='bot'?'NEXA / ASSISTANT':'YOU'}</div>${escape(m.text)}</div>`).join('');messages.scrollTop=messages.scrollHeight};const send=q=>{q=q.trim();if(!q)return;state.chat.push({role:'user',text:q});state.chat.push({role:'bot',text:reply(q)});state.chat=state.chat.slice(-60);log('Asked NEXA: '+q.slice(0,70));render();input.value=''};document.querySelector('#chat-form').addEventListener('submit',e=>{e.preventDefault();send(input.value)});document.querySelector('#clear-chat').addEventListener('click',()=>{if(!confirm('Clear all NEXA chat messages stored on this device?'))return;state.chat=[];save();render();input.focus()});document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>send(b.dataset.prompt)));render()}if(page==='agents.html'){const agents=[{id:'research',name:'Research Agent',icon:'✳',text:'Explore information, summarize context, and help form a clearer picture before a decision.'},{id:'coordination',name:'Coordination Agent',icon:'⬡',text:'Explore how multiple agent roles might hand off tasks and organize connected workflows.'},{id:'verification',name:'Verification Agent',icon:'◇',text:'Imagine checks and human approval before any proposed onchain action.'}];const render=()=>{document.querySelector('#agent-list').innerHTML=agents.map(a=>`<article class="agent-card"><div class="agent-mark">${a.icon}</div><h2>${a.name}</h2><p>${a.text}</p><div class="agent-bottom"><span>${state.agents[a.id]?'ENABLED / DEMO':'DISABLED / DEMO'}</span><button class="toggle" aria-label="Toggle ${a.name}" aria-pressed="${!!state.agents[a.id]}" data-agent="${a.id}"></button></div></article>`).join('');document.querySelectorAll('[data-agent]').forEach(b=>b.addEventListener('click',()=>{state.agents[b.dataset.agent]=!state.agents[b.dataset.agent];log(`${agents.find(a=>a.id===b.dataset.agent).name} ${state.agents[b.dataset.agent]?'enabled':'disabled'}`);render()}))};render()}if(page==='activity.html'){const list=document.querySelector('#activity-list');const render=()=>{list.innerHTML=state.events.length?state.events.map(e=>`<div class="activity-row"><div class="activity-icon">◷</div><div><strong>${escape(e.label)}</strong><small>${new Date(e.date).toLocaleString()}</small></div></div>`).join(''):'<div class="empty-state">No activity yet.<br>Try AI Chat or switch an agent on in Agent Studio.</div>'};document.querySelector('#clear-activity').addEventListener('click',()=>{state.events=[];save();render()});render()}if(page==='settings.html'){const input=document.querySelector('#profile-name');input.value=state.name;document.querySelector('#profile-form').addEventListener('submit',e=>{e.preventDefault();state.name=input.value.trim().slice(0,30)||'Explorer';log('Updated display name');document.querySelector('#profile-feedback').textContent='Saved locally.'});document.querySelector('#reset-data').addEventListener('click',()=>{if(!confirm('Reset all local NEXA demo data?'))return;state=initial();save();input.value=state.name;document.querySelector('#reset-feedback').textContent='Demo data reset.'})}})();
+(() => {
+  'use strict';
+
+  const KEY = 'nexa-demo-v1';
+
+  const initial = () => ({
+    name: 'Explorer',
+    agents: {
+      research: true,
+      coordination: false,
+      verification: false
+    },
+    chat: [],
+    events: []
+  });
+
+  let state;
+
+  try {
+    state = {
+      ...initial(),
+      ...JSON.parse(localStorage.getItem(KEY) || '{}')
+    };
+  } catch {
+    state = initial();
+  }
+
+  const save = () => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {}
+  };
+
+  const log = (label) => {
+    state.events.unshift({
+      label,
+      date: new Date().toISOString()
+    });
+
+    state.events = state.events.slice(0, 80);
+    save();
+  };
+
+  const escape = (s) =>
+    String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[c]));
+
+  const page = document.body.dataset.page;
+
+  // OVERVIEW
+  if (page === 'index.html') {
+    const hero = document.querySelector('.hero-copy h1');
+
+    if (state.name !== 'Explorer' && hero) {
+      document.querySelector('.pill').title =
+        `Welcome, ${state.name}`;
+    }
+  }
+
+  // NEXA CHAT
+  if (page === 'chat.html') {
+    const messages = document.querySelector('#messages');
+    const input = document.querySelector('#chat-input');
+
+    const comingSoonMessage =
+      "NEXA AI is not active yet.\n\n" +
+      "We're currently working on bringing AI-powered chat to NEXA. " +
+      "A new update is coming soon!\n\n" +
+      "For the latest news and development updates, " +
+      "follow our official X (Twitter) account:\n" +
+      "@NexaDotTech\n" +
+      "https://x.com/NexaDotTech\n\n" +
+      "Thank you for your patience and support!";
+
+    const reply = () => comingSoonMessage;
+
+    const formatMessage = (text) => {
+      return escape(text)
+        .replace(
+          /https:\/\/x\.com\/NexaDotTech/g,
+          '<a href="https://x.com/NexaDotTech" ' +
+          'target="_blank" rel="noopener noreferrer">' +
+          'https://x.com/NexaDotTech</a>'
+        )
+        .replace(/\n/g, '<br>');
+    };
+
+    const render = () => {
+      const welcome = `
+        <div class="message bot">
+          <div class="message-label">NEXA / ASSISTANT</div>
+          Welcome to NEXA Chat! 👋
+          <br><br>
+          Our AI chat is currently under development.
+          Send a message to learn more about upcoming updates.
+        </div>
+      `;
+
+      messages.innerHTML =
+        (state.chat.length ? '' : welcome) +
+        state.chat.map((m) => `
+          <div class="message ${m.role}">
+            <div class="message-label">
+              ${m.role === 'bot' ? 'NEXA / ASSISTANT' : 'YOU'}
+            </div>
+            ${formatMessage(m.text)}
+          </div>
+        `).join('');
+
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    const send = (q) => {
+      q = q.trim();
+
+      if (!q) return;
+
+      state.chat.push({
+        role: 'user',
+        text: q
+      });
+
+      state.chat.push({
+        role: 'bot',
+        text: reply()
+      });
+
+      state.chat = state.chat.slice(-60);
+
+      log('Asked NEXA: ' + q.slice(0, 70));
+
+      render();
+      input.value = '';
+    };
+
+    document.querySelector('#chat-form')
+      .addEventListener('submit', (e) => {
+        e.preventDefault();
+        send(input.value);
+      });
+
+    document.querySelector('#clear-chat')
+      .addEventListener('click', () => {
+        if (!confirm(
+          'Clear all NEXA chat messages stored on this device?'
+        )) return;
+
+        state.chat = [];
+        save();
+        render();
+        input.focus();
+      });
+
+    document.querySelectorAll('[data-prompt]')
+      .forEach((button) => {
+        button.addEventListener('click', () => {
+          send(button.dataset.prompt);
+        });
+      });
+
+    render();
+  }
+
+  // AGENT STUDIO
+  if (page === 'agents.html') {
+    const agents = [
+      {
+        id: 'research',
+        name: 'Research Agent',
+        icon: '✳',
+        text: 'Explore information, summarize context, and help form a clearer picture before a decision.'
+      },
+      {
+        id: 'coordination',
+        name: 'Coordination Agent',
+        icon: '⬡',
+        text: 'Explore how multiple agent roles might hand off tasks and organize connected workflows.'
+      },
+      {
+        id: 'verification',
+        name: 'Verification Agent',
+        icon: '◇',
+        text: 'Imagine checks and human approval before any proposed onchain action.'
+      }
+    ];
+
+    const render = () => {
+      document.querySelector('#agent-list').innerHTML =
+        agents.map((a) => `
+          <article class="agent-card">
+            <div class="agent-mark">${a.icon}</div>
+            <h2>${a.name}</h2>
+            <p>${a.text}</p>
+            <div class="agent-bottom">
+              <span>
+                ${state.agents[a.id]
+                  ? 'ENABLED / DEMO'
+                  : 'DISABLED / DEMO'}
+              </span>
+              <button
+                class="toggle"
+                aria-label="Toggle ${a.name}"
+                aria-pressed="${!!state.agents[a.id]}"
+                data-agent="${a.id}">
+              </button>
+            </div>
+          </article>
+        `).join('');
+
+      document.querySelectorAll('[data-agent]')
+        .forEach((button) => {
+          button.addEventListener('click', () => {
+            const id = button.dataset.agent;
+
+            state.agents[id] = !state.agents[id];
+
+            log(
+              `${agents.find((a) => a.id === id).name} ` +
+              `${state.agents[id] ? 'enabled' : 'disabled'}`
+            );
+
+            render();
+          });
+        });
+    };
+
+    render();
+  }
+
+  // ACTIVITY
+  if (page === 'activity.html') {
+    const list = document.querySelector('#activity-list');
+
+    const render = () => {
+      list.innerHTML = state.events.length
+        ? state.events.map((e) => `
+            <div class="activity-row">
+              <div class="activity-icon">◷</div>
+              <div>
+                <strong>${escape(e.label)}</strong>
+                <small>
+                  ${new Date(e.date).toLocaleString()}
+                </small>
+              </div>
+            </div>
+          `).join('')
+        : `<div class="empty-state">
+             No activity yet.<br>
+             Try AI Chat or switch an agent on in Agent Studio.
+           </div>`;
+    };
+
+    document.querySelector('#clear-activity')
+      .addEventListener('click', () => {
+        state.events = [];
+        save();
+        render();
+      });
+
+    render();
+  }
+
+  // SETTINGS
+  if (page === 'settings.html') {
+    const input = document.querySelector('#profile-name');
+
+    input.value = state.name;
+
+    document.querySelector('#profile-form')
+      .addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        state.name =
+          input.value.trim().slice(0, 30) || 'Explorer';
+
+        log('Updated display name');
+
+        document.querySelector('#profile-feedback')
+          .textContent = 'Saved locally.';
+      });
+
+    document.querySelector('#reset-data')
+      .addEventListener('click', () => {
+        if (!confirm(
+          'Reset all local NEXA demo data?'
+        )) return;
+
+        state = initial();
+        save();
+
+        input.value = state.name;
+
+        document.querySelector('#reset-feedback')
+          .textContent = 'Demo data reset.';
+      });
+  }
+})();
